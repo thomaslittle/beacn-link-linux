@@ -8,13 +8,19 @@
   },
   "scripts": {
     "build": "node-gyp rebuild",
-    "start": "./src/cli/cli.js",
+    "start": "node src/cli/cli.js",
+    "dev": "nodemon src/cli/cli.js",
     "prepare": "node-gyp rebuild",
     "clean": "node-gyp clean",
-    "rebuild": "node-gyp rebuild",
+    "rebuild": "npm run clean && npm run build",
     "test": "cd tests/pipewire && ./build-test.sh",
+    "test:watch": "cd tests/pipewire && nodemon -e c --exec './build-test.sh'",
     "debug": "PIPEWIRE_DEBUG=3 node src/cli/cli.js",
-    "lint": "gcc -Wall -Wextra -Wpedantic -fsyntax-only lib/native/beacn_native.cc"
+    "debug:native": "PIPEWIRE_DEBUG=3 gdb --args node src/cli/cli.js",
+    "lint": "gcc -Wall -Wextra -Wpedantic -fsyntax-only lib/native/beacn_native.cc",
+    "lint:fix": "gcc -Wall -Wextra -Wpedantic -fsyntax-only lib/native/beacn_native.cc -o /dev/null",
+    "install:local": "npm install -g .",
+    "uninstall:local": "npm uninstall -g beacn-desktop-linux"
   },
   "keywords": [
     "beacn",
@@ -39,7 +45,8 @@
   "devDependencies": {
     "node-gyp": "^10.0.1",
     "mocha": "^10.2.0",
-    "chai": "^4.3.10"
+    "chai": "^4.3.10",
+    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=16.0.0"
