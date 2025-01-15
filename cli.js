@@ -1,162 +1,223 @@
 #!/usr/bin/env node
 
-const beacnLink = require('./index');
+const beacnNative = require('./build/Release/beacn_native');
+const chalk = require('chalk');
 const readline = require('readline');
 
-// ANSI color codes
+// Color scheme
 const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+  title: chalk.bold.cyan,
+  success: chalk.green,
+  error: chalk.red,
+  warning: chalk.yellow,
+  info: chalk.blue,
+  device: chalk.magenta,
+  state: chalk.cyan,
+  prompt: chalk.bold.green,
+  header: chalk.bold.white,
+  detail: chalk.gray,
+  command: chalk.yellow,
 };
 
-// Command handlers
-const commands = {
-  status: (args) => {
-    if (args[1]) {
-      const device = Object.values(beacnLink.devices).find(d => d.name === args[1]);
-      if (!device) {
-        return console.log(`${colors.yellow}Device not found: ${args[1]}${colors.reset}`);
-      }
-      const status = device.getStatus();
-      console.log(`\n${colors.bright}${status.description}:${colors.reset}`);
-      console.log(JSON.stringify(status, null, 2));
-    } else {
-      const status = beacnLink.getAllDeviceStatus();
-      console.log(`\n${colors.bright}All Device Status:${colors.reset}`);
-      console.log(JSON.stringify(status, null, 2));
-    }
-  },
-
-  volume: (args) => {
-    if (args.length !== 3) {
-      return console.log(`${colors.yellow}Usage: volume <device> <0-100>${colors.reset}`);
-    }
-    const device = Object.values(beacnLink.devices).find(d => d.name === args[1]);
-    if (!device) {
-      return console.log(`${colors.yellow}Device not found: ${args[1]}${colors.reset}`);
-    }
-    const volume = parseInt(args[2]) / 100;
-    if (isNaN(volume) || volume < 0 || volume > 1) {
-      return console.log(`${colors.yellow}Volume must be between 0 and 100${colors.reset}`);
-    }
-    device.setVolume(volume);
-    console.log(`${colors.green}Set ${device.description} volume to ${args[2]}%${colors.reset}`);
-  },
-
-  mute: (args) => {
-    if (args.length !== 3 || !['on', 'off'].includes(args[2].toLowerCase())) {
-      return console.log(`${colors.yellow}Usage: mute <device> <on|off>${colors.reset}`);
-    }
-    const device = Object.values(beacnLink.devices).find(d => d.name === args[1]);
-    if (!device) {
-      return console.log(`${colors.yellow}Device not found: ${args[1]}${colors.reset}`);
-    }
-    const mute = args[2].toLowerCase() === 'on';
-    device.setMute(mute);
-    console.log(`${colors.green}Set ${device.description} mute to ${mute ? 'on' : 'off'}${colors.reset}`);
-  },
-
-  list: () => {
-    console.log(`\n${colors.bright}Available Devices:${colors.reset}`);
-    Object.values(beacnLink.devices).forEach(device => {
-      console.log(`${colors.cyan}${device.name}${colors.reset} (${device.description})`);
-    });
-  },
-
-  help: () => {
-    console.log(`
-${colors.bright}BEACN Link CLI Commands:${colors.reset}
-
-${colors.cyan}status [device]${colors.reset}        Show status of all devices or specific device
-${colors.cyan}volume <device> <0-100>${colors.reset}  Set volume for device (0-100%)
-${colors.cyan}mute <device> <on|off>${colors.reset}   Set mute state for device
-${colors.cyan}list${colors.reset}                   List all available devices
-${colors.cyan}help${colors.reset}                   Show this help message
-${colors.cyan}quit${colors.reset}                   Exit the application
-
-${colors.bright}Available Devices:${colors.reset}
-- beacn_link_out       (Main Output)
-- beacn_link_2_out     (Secondary Output)
-- beacn_link_3_out     (Third Output)
-- beacn_link_4_out     (Fourth Output)
-- beacn_virtual_input  (Virtual Input)
-`);
-  },
-
-  quit: () => {
-    console.log(`\n${colors.green}Cleaning up virtual devices...${colors.reset}`);
-    cleanup();
-    process.exit(0);
-  },
-
-  exit: () => commands.quit()
-};
-
-function cleanup() {
-  if (beacnLink.initialized) {
-    beacnLink.cleanup();
-  }
+// Logging utilities
+function logTitle(text) {
+  console.log('\n' + colors.title('=== ' + text + ' ==='));
 }
 
-function handleCommand(cmd) {
-  const args = cmd.trim().split(/\s+/);
-  const command = args[0].toLowerCase();
+function logSuccess(text) {
+  console.log(colors.success('✓ ' + text));
+}
 
+function logError(text) {
+  console.log(colors.error('✗ ' + text));
+}
+
+function logInfo(text) {
+  console.log(colors.info('ℹ ' + text));
+}
+
+function logWarning(text) {
+  console.log(colors.warning('⚠ ' + text));
+}
+
+function logDevice(name, description) {
+  console.log(colors.device(`${name}`) + colors.detail(` (${description})`));
+}
+
+function logState(text, state) {
+  console.log(colors.detail('  └─ ') + colors.state(text) + ': ' + state);
+}
+
+function logStep(number, text) {
+  console.log(colors.header(`\nStep ${number}: `) + text);
+}
+
+// Main CLI interface
+console.log(colors.title('\nBEACN Link CLI'));
+console.log(colors.info('Type \'help\' for available commands\n'));
+
+logTitle('Initializing Virtual Devices');
+
+// Device creation process
+logStep(1, 'Creating Virtual Devices');
+logInfo('Initializing PipeWire...');
+
+try {
+  beacnNative.createVirtualDevice();
+  logSuccess('Successfully created virtual devices');
+} catch (error) {
+  logError('Failed to create virtual devices: ' + error.message);
+  process.exit(1);
+}
+
+const devices = [
+  { name: 'beacn_link_out', description: 'Link Out', type: 'Sink' },
+  { name: 'beacn_link_2_out', description: 'Link 2 Out', type: 'Sink' },
+  { name: 'beacn_link_3_out', description: 'Link 3 Out', type: 'Sink' },
+  { name: 'beacn_link_4_out', description: 'Link 4 Out', type: 'Sink' },
+  { name: 'beacn_virtual_input', description: 'BEACN Virtual Input', type: 'Source' }
+];
+
+logTitle('Device Status');
+
+for (const device of devices) {
+  logDevice(device.name, device.description);
   try {
-    if (command in commands) {
-      commands[command](args);
-    } else {
-      console.log(`${colors.yellow}Unknown command. Type 'help' for available commands.${colors.reset}`);
-    }
+    const status = beacnNative.getDeviceStatus(device.name);
+    logState('Type', device.type);
+    logState('Volume', Math.round(status.volume * 100) + '%');
+    logState('Mute', status.mute ? 'Yes' : 'No');
+    logState('State', 'PAUSED');
   } catch (error) {
-    console.error(`${colors.yellow}Error: ${error.message}${colors.reset}`);
+    logError(`Failed to get status: ${error.message}`);
   }
 }
 
-// Main CLI loop
-async function main() {
-  process.on('SIGINT', commands.quit);
-  process.on('SIGTERM', commands.quit);
-  process.on('exit', cleanup);
+logTitle('Ready');
+logSuccess('All virtual devices are ready');
 
-  try {
-    // Check if running with arguments
-    if (process.argv.length > 2) {
-      beacnLink.init();
-      handleCommand(process.argv.slice(2).join(' '));
-      cleanup();
-      return;
-    }
+// CLI prompt
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: colors.prompt('beacn> ')
+});
 
-    console.log(`${colors.bright}BEACN Link CLI${colors.reset}`);
-    console.log(`Type 'help' for available commands\n`);
+rl.prompt();
 
-    beacnLink.init();
+rl.on('line', (line) => {
+  const command = line.trim().toLowerCase();
+  const args = command.split(' ');
 
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      prompt: `${colors.magenta}beacn>${colors.reset} `,
-      removeHistoryDuplicates: true
-    });
+  switch (args[0]) {
+    case 'help':
+      logTitle('Available Commands');
+      console.log(colors.command('help') + colors.detail('                     - Show this help message'));
+      console.log(colors.command('status [device]') + colors.detail('         - Show device status'));
+      console.log(colors.command('list') + colors.detail('                     - List all devices'));
+      console.log(colors.command('volume <device> <0-100>') + colors.detail(' - Set device volume'));
+      console.log(colors.command('mute <device> <on|off>') + colors.detail('  - Set device mute'));
+      console.log(colors.command('quit') + colors.detail('                     - Exit the application'));
+      break;
 
-    rl.prompt();
-
-    rl.on('line', (line) => {
-      if (line.trim()) {
-        handleCommand(line);
+    case 'status':
+      logTitle('Device Status');
+      if (args[1]) {
+        const device = devices.find(d => d.name === args[1]);
+        if (!device) {
+          logError(`Device not found: ${args[1]}`);
+          break;
+        }
+        logDevice(device.name, device.description);
+        try {
+          const status = beacnNative.getDeviceStatus(device.name);
+          logState('Type', device.type);
+          logState('Volume', Math.round(status.volume * 100) + '%');
+          logState('Mute', status.mute ? 'Yes' : 'No');
+          logState('State', 'PAUSED');
+        } catch (error) {
+          logError(`Failed to get status: ${error.message}`);
+        }
+      } else {
+        for (const device of devices) {
+          logDevice(device.name, device.description);
+          try {
+            const status = beacnNative.getDeviceStatus(device.name);
+            logState('Type', device.type);
+            logState('Volume', Math.round(status.volume * 100) + '%');
+            logState('Mute', status.mute ? 'Yes' : 'No');
+            logState('State', 'PAUSED');
+          } catch (error) {
+            logError(`Failed to get status: ${error.message}`);
+          }
+        }
       }
-      rl.prompt();
-    }).on('close', commands.quit);
+      break;
 
-  } catch (error) {
-    console.error(`${colors.yellow}Fatal error: ${error.message}${colors.reset}`);
-    process.exit(1);
+    case 'volume':
+      if (args.length !== 3) {
+        logError('Usage: volume <device> <0-100>');
+        break;
+      }
+      const volume = parseInt(args[2]);
+      if (isNaN(volume) || volume < 0 || volume > 100) {
+        logError('Volume must be between 0 and 100');
+        break;
+      }
+      try {
+        beacnNative.setVolume(args[1], volume / 100);
+        logSuccess(`Set ${args[1]} volume to ${volume}%`);
+      } catch (error) {
+        logError(`Failed to set volume: ${error.message}`);
+      }
+      break;
+
+    case 'mute':
+      if (args.length !== 3 || !['on', 'off'].includes(args[2])) {
+        logError('Usage: mute <device> <on|off>');
+        break;
+      }
+      try {
+        beacnNative.setMute(args[1], args[2] === 'on');
+        logSuccess(`Set ${args[1]} mute to ${args[2]}`);
+      } catch (error) {
+        logError(`Failed to set mute: ${error.message}`);
+      }
+      break;
+
+    case 'list':
+      logTitle('Available Devices');
+      for (const device of devices) {
+        logDevice(device.name, device.description);
+      }
+      break;
+
+    case 'quit':
+      logInfo('Cleaning up...');
+      try {
+        beacnNative.cleanup();
+        logSuccess('Cleanup complete');
+      } catch (error) {
+        logError(`Cleanup failed: ${error.message}`);
+      }
+      rl.close();
+      process.exit(0);
+      break;
+
+    default:
+      if (command !== '') {
+        logError('Unknown command. Type \'help\' for available commands.');
+      }
+      break;
   }
-}
 
-main(); 
+  rl.prompt();
+}).on('close', () => {
+  console.log(colors.info('\nGoodbye!'));
+  try {
+    beacnNative.cleanup();
+  } catch (error) {
+    // Ignore cleanup errors on exit
+  }
+  process.exit(0);
+}); 

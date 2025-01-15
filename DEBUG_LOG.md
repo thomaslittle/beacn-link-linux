@@ -1,134 +1,173 @@
-# BEACN Desktop Linux Debug Log
+# Debug Log
 
-Last Updated: [Current Date]
+This document provides detailed debugging information for the BEACN Desktop Linux application.
 
-## Current State
+## Virtual Device States
 
-### 1. Core Architecture
-- Successfully migrated from thread loop to main loop architecture
-- Simplified event handling and synchronization
-- Implemented direct event loop iteration for better control
-- Removed all thread loop dependencies
-- Basic PipeWire connectivity verified with test program
-- Stream creation and event handling verified
-- Volume and mute controls verified
-- Multiple stream handling verified
+### State Transitions
+```
+UNCONNECTED (0) -> CONNECTING (1) -> PAUSED (2) -> STREAMING (3)
+```
 
-### 2. Main Issues
-- ✓ Command execution environment issues resolved
-- ✓ Main loop behavior verified with stream test
-- ✓ State tracking verified with control test
-- ✓ Multiple stream handling verified
+Each state change is logged with the following format:
+```
+Stream <id> state changed: <old_state> -> <new_state>
+Stream <id> <state_name>
+```
 
-### 3. Recent Changes
-- Completely removed pw_thread_loop usage
-- Implemented pw_main_loop based architecture
-- Updated all synchronization points to use main loop
-- Simplified stream state management
-- Improved timeout handling using monotonic clock
-- Removed unnecessary locking/unlocking operations
-- Added basic PipeWire connectivity test
-- Added stream creation and event handling test
-- Added volume and mute control test with state tracking
-- Added multiple stream test with error handling
+### State Descriptions
 
-### 4. Current Focus
-- ✓ Basic build and test environment working
-- ✓ Main loop based approach verified with stream test
-- ✓ Volume and mute controls verified
-- ✓ Multiple stream handling verified
-- Adding stress testing
-- Improving error recovery
+1. **UNCONNECTED (0)**
+   - Initial state when stream is created
+   - No connection to PipeWire daemon
+   - Properties and format not yet set
 
-## Next Steps
+2. **CONNECTING (1)**
+   - Attempting to connect to PipeWire
+   - Stream properties being set
+   - Audio format being negotiated
+   - If stuck in this state:
+     - Check PipeWire daemon status
+     - Verify audio format compatibility
+     - Check for resource conflicts
 
-### 1. Event Loop Management
-- ✓ Verify main loop iteration behavior with stream operations
-- ✓ Test event processing with multiple streams
-- Add better timeout handling if needed
-- Add stress testing for event loop performance
+3. **PAUSED (2)**
+   - Successfully connected to PipeWire
+   - Stream ready for audio data
+   - Default state after connection
+   - Normal state when no audio is flowing
+   - Properties:
+     - Format: 32-bit float
+     - Rate: 48000 Hz
+     - Channels: 2 (stereo)
+     - Buffer size: 1024 frames
 
-### 2. State Management
-- ✓ Verify stream state tracking with new architecture
-- ✓ Ensure volume and mute changes are properly tracked
-- ✓ Test multiple stream state handling
-- Implement better error recovery for stream operations
-- Add state validation tests
+4. **STREAMING (3)**
+   - Actively processing audio data
+   - Buffer callbacks being processed
+   - Audio data flowing through device
+   - Only enters this state when:
+     - Audio data is being sent
+     - Device is actively used by an application
 
-### 3. Testing Needed
-- ✓ Basic connectivity to PipeWire
-- ✓ Stream creation and management
-- ✓ Volume and mute controls
-- ✓ Multiple stream handling
-- Cleanup and reinitialization
-- Error handling scenarios
-- Stress testing
+## Debug Output Format
 
-## Known Issues
+### Device Creation
+```
+Creating virtual device: <name>
+Description: <description>
+Type: <Sink|Source>
+Using stream slot <id>
+Creating stream properties...
+Creating stream...
+Adding stream listener...
+Creating audio format...
+Connecting stream...
+```
 
-### Critical
-1. ✓ Build/test environment issues resolved
-2. ✓ Main loop behavior verified in practice
-3. ✓ State tracking verified with control test
-4. ✓ Multiple stream handling verified
+### Core Operations
+```
+Core info received: id=<id> seq=<seq>
+Core operation completed: id=<id> seq=<seq>
+```
 
-### To Investigate
-1. Main loop iteration performance with multiple streams
-2. Stream state change handling efficiency
-3. Error recovery strategies
-4. Resource cleanup under error conditions
+### Stream Events
+```
+Stream <id> format changed
+Stream state changed: <old> -> <new>
+Stream <id> <state_name>
+```
 
-## Last Attempted Fix
-- Added basic PipeWire connectivity test
-- Verified build environment works
-- Confirmed PipeWire development files are properly installed
-- Tested basic PipeWire connection and cleanup
-- Added stream creation and event handling test
-- Verified main loop behavior with stream operations
-- Added volume and mute control test
-- Verified state tracking for controls
-- Added multiple stream test
-- Implemented basic error handling
+## Common Issues and Debug Steps
 
-## Next Planned Fix
-- Add stress test for event loop
-- Improve error recovery strategies
-- Add cleanup/reinitialization test
-- Add resource monitoring
+### 1. Device Creation Issues
+- Check PipeWire daemon status:
+  ```bash
+  systemctl --user status pipewire
+  ```
+- Verify PipeWire version:
+  ```bash
+  pw-cli info all | grep version
+  ```
+- Check for existing nodes:
+  ```bash
+  pw-cli ls Node
+  ```
 
-## Code Areas to Focus On
+### 2. State Transition Issues
+- Monitor state changes in real-time:
+  ```bash
+  PIPEWIRE_DEBUG=3 node cli.js
+  ```
+- Check for format negotiation issues:
+  ```bash
+  pw-top
+  ```
+- Verify no conflicting devices:
+  ```bash
+  pactl list short sinks
+  pactl list short sources
+  ```
 
-### beacn_native.cc
-1. Event loop management in:
-   - ✓ `init_pipewire` (verified)
-   - ✓ `create_virtual_device` (verified)
-   - ✓ Stream operations (volume/mute controls verified)
-   - ✓ Multiple stream handling (verified)
+### 3. Audio Flow Issues
+- Check buffer processing:
+  ```bash
+  pw-profiler
+  ```
+- Monitor audio levels:
+  ```bash
+  pw-mon
+  ```
+- Check for xruns:
+  ```bash
+  pw-metadata -n settings 0 clock.force-rate
+  ```
 
-2. State tracking in:
-   - ✓ Stream event handlers (verified)
-   - ✓ Volume/mute operations (verified)
-   - ✓ Multiple stream states (verified)
-   - Cleanup sequences
-   - Error recovery
+## Debug Environment Variables
 
-3. Error handling in:
-   - Stream operations
-   - Core operations
-   - Event processing
-   - Resource cleanup
+- `PIPEWIRE_DEBUG=3`: Enable detailed PipeWire debug output
+- `PIPEWIRE_LOG_SYSTEMD=true`: Send debug output to systemd journal
+- `PIPEWIRE_LATENCY`: Override default latency settings
+- `PIPEWIRE_NODE`: Override node settings
 
-## Notes
-- Main loop approach is working well and reliable
-- Basic PipeWire connectivity is working
-- Stream creation and event handling verified
-- Volume and mute controls working correctly
-- State tracking is accurate and responsive
-- Multiple stream handling works efficiently
-- Error handling needs improvement
-- Consider adding more detailed logging for initial testing
-- May need to adjust timeouts based on testing
-- Add performance metrics for event loop iterations
-- Consider adding error injection for robustness testing
-- Need to implement proper error recovery strategies
-- Resource monitoring needed for multiple streams 
+## Testing Commands
+
+1. Test device visibility:
+```bash
+pw-cli ls Node | grep beacn
+```
+
+2. Test device properties:
+```bash
+pw-cli enum Device | grep -A 20 beacn
+```
+
+3. Test audio routing:
+```bash
+pw-link -o beacn_link_out:input_FL another_device:output_FL
+pw-link -o beacn_link_out:input_FR another_device:output_FR
+```
+
+4. Monitor device states:
+```bash
+watch -n 1 'pw-cli ls Node | grep beacn'
+```
+
+## Performance Monitoring
+
+Monitor system performance during device operation:
+
+1. CPU Usage:
+```bash
+top -p $(pgrep -f beacn)
+```
+
+2. Memory Usage:
+```bash
+ps -o pid,ppid,%mem,rss,cmd -p $(pgrep -f beacn)
+```
+
+3. Audio Buffer Stats:
+```bash
+pw-top | grep beacn
+``` 

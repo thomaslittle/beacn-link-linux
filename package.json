@@ -1,7 +1,7 @@
 {
   "name": "beacn-desktop-linux",
-  "version": "1.0.0",
-  "description": "Linux-compatible version of the BEACN Link app using PipeWire",
+  "version": "0.1.0",
+  "description": "Linux-compatible version of the BEACN Link app using PipeWire for virtual audio devices",
   "main": "index.js",
   "bin": {
     "beacn": "./cli.js"
@@ -9,7 +9,12 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "start": "./cli.js",
-    "prepare": "node-gyp rebuild"
+    "prepare": "node-gyp rebuild",
+    "clean": "node-gyp clean",
+    "rebuild": "node-gyp rebuild",
+    "test": "node test/test.js",
+    "debug": "PIPEWIRE_DEBUG=3 node cli.js",
+    "lint": "gcc -Wall -Wextra -Wpedantic -fsyntax-only beacn_native.cc"
   },
   "keywords": [
     "beacn",
@@ -18,15 +23,23 @@
     "linux",
     "cli",
     "virtual-audio",
-    "audio-routing"
+    "audio-routing",
+    "virtual-devices",
+    "audio-mixer",
+    "sound-server"
   ],
-  "author": "",
+  "author": "Thomas Little",
   "license": "MIT",
   "dependencies": {
-    "node-addon-api": "^7.0.0"
+    "node-addon-api": "^7.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "debug": "^4.3.4"
   },
   "devDependencies": {
-    "node-gyp": "^10.0.1"
+    "node-gyp": "^10.0.1",
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -34,8 +47,12 @@
   "gypfile": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/beacn-desktop-linux.git"
+    "url": "https://github.com/thomaslittle/beacn-desktop-linux-bash.git"
   },
+  "bugs": {
+    "url": "https://github.com/thomaslittle/beacn-desktop-linux-bash/issues"
+  },
+  "homepage": "https://github.com/thomaslittle/beacn-desktop-linux-bash#readme",
   "os": [
     "linux"
   ],
@@ -48,6 +65,13 @@
     "binding.gyp",
     "beacn_native.cc",
     "README.md",
+    "DEBUG_LOG.md",
+    "CHANGELOG.md",
     "LICENSE"
-  ]
+  ],
+  "directories": {
+    "lib": "lib",
+    "test": "test",
+    "doc": "docs"
+  }
 }

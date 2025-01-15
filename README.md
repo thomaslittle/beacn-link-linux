@@ -74,11 +74,29 @@ beacn help
 
 ### Available Devices
 
-- `beacn_link_out` - Main Output
-- `beacn_link_2_out` - Secondary Output
-- `beacn_link_3_out` - Third Output
-- `beacn_link_4_out` - Fourth Output
-- `beacn_virtual_input` - Virtual Input
+The following virtual audio devices are created:
+
+- `beacn_link_out` (Link Out) - Main Output
+- `beacn_link_2_out` (Link 2 Out) - Secondary Output
+- `beacn_link_3_out` (Link 3 Out) - Third Output
+- `beacn_link_4_out` (Link 4 Out) - Fourth Output
+- `beacn_virtual_input` (BEACN Virtual Input) - Virtual Input
+
+All devices are created with the following properties:
+- 48kHz sample rate
+- 2 channels (stereo)
+- 32-bit float format
+- Default buffer size: 1024 frames
+
+### Device States
+
+The virtual devices go through several states:
+1. `UNCONNECTED` - Initial state when created
+2. `CONNECTING` - Attempting to connect to PipeWire
+3. `PAUSED` - Connected but not actively streaming (default state)
+4. `STREAMING` - Actively processing audio data
+
+Note: Devices will remain in the `PAUSED` state until audio data is sent through them. This is normal behavior and the devices are still fully functional.
 
 ### Programmatic Usage
 
@@ -108,12 +126,19 @@ beacnLink.cleanup();
 1. If the virtual devices don't appear:
    - Make sure PipeWire is running: `systemctl --user status pipewire`
    - Check PipeWire logs: `journalctl --user -u pipewire`
+   - Verify devices in GNOME Settings or `pavucontrol`
+   - Check PipeWire nodes: `pw-cli ls Node`
 
-2. If you get permission errors:
+2. If devices are stuck in `CONNECTING` state:
+   - Check PipeWire daemon status
+   - Ensure no conflicting audio configurations
+   - Try restarting PipeWire: `systemctl --user restart pipewire`
+
+3. If you get permission errors:
    - Make sure your user is in the audio group: `sudo usermod -aG audio $USER`
    - Log out and log back in for the group changes to take effect
 
-3. If the installation fails:
+4. If the installation fails:
    - Make sure all dependencies are installed
    - Try installing with verbose output: `sudo npm install -g beacn-desktop-linux --verbose`
 
@@ -141,6 +166,14 @@ npm run build
 ```bash
 npm start
 ```
+
+### Architecture
+
+The project consists of two main components:
+1. Native C++ module (`beacn_native.cc`) - Handles PipeWire integration and virtual device creation
+2. Node.js CLI (`cli.js`) - Provides user interface and device control
+
+The native module creates virtual devices using PipeWire streams, which appear as audio devices in the system. Each device is initialized in a `PAUSED` state and transitions to `STREAMING` when audio data is processed.
 
 ## License
 
