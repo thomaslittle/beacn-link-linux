@@ -1,17 +1,156 @@
 # Build output
 build/
 node_modules/
+*.o
+*.so
+*.node
+*.a
+*.lib
+*.dll
+*.dylib
+*.exe
+*.out
+
+# Dependency directories
+/node_modules/
+/.pnp/
+.pnp.js
+
+# Testing
+/coverage/
+/.nyc_output/
+/tests/pipewire/test_*
+!/tests/pipewire/test_*.c
+!/tests/pipewire/build-test.sh
+
+# Debug files
+*.debug
+core
+*.core
 
 # IDE and editor files
 .vscode/
 .idea/
 *.swp
 *~
+*.sublime-*
+.project
+.classpath
+.settings/
+*.code-workspace
 
 # OS files
 .DS_Store
 Thumbs.db
+.directory
+.Trash-*
+$RECYCLE.BIN/
+Desktop.ini
 
-# Logs
+# Logs and databases
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.sqlite
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+tmp/
+temp/
+
+# Package files
+*.tgz
+*.tar.gz
+*.zip
+*.rar
+
+# Rust/Cargo specific
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Node.js specific
+.npm/
+.node_repl_history
+.yarn-integrity
+.next
+.nuxt
+dist/
+.serverless/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# public
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*

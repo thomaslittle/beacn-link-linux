@@ -2,19 +2,19 @@
   "name": "beacn-desktop-linux",
   "version": "0.1.0",
   "description": "Linux-compatible version of the BEACN Link app using PipeWire for virtual audio devices",
-  "main": "index.js",
+  "main": "lib/index.js",
   "bin": {
-    "beacn": "./cli.js"
+    "beacn": "src/cli/cli.js"
   },
   "scripts": {
     "build": "node-gyp rebuild",
-    "start": "./cli.js",
+    "start": "./src/cli/cli.js",
     "prepare": "node-gyp rebuild",
     "clean": "node-gyp clean",
     "rebuild": "node-gyp rebuild",
-    "test": "node test/test.js",
-    "debug": "PIPEWIRE_DEBUG=3 node cli.js",
-    "lint": "gcc -Wall -Wextra -Wpedantic -fsyntax-only beacn_native.cc"
+    "test": "cd tests/pipewire && ./build-test.sh",
+    "debug": "PIPEWIRE_DEBUG=3 node src/cli/cli.js",
+    "lint": "gcc -Wall -Wextra -Wpedantic -fsyntax-only lib/native/beacn_native.cc"
   },
   "keywords": [
     "beacn",
@@ -60,18 +60,17 @@
     "x64"
   ],
   "files": [
-    "index.js",
-    "cli.js",
+    "lib/",
+    "src/",
     "binding.gyp",
-    "beacn_native.cc",
     "README.md",
-    "DEBUG_LOG.md",
-    "CHANGELOG.md",
+    "docs/",
     "LICENSE"
   ],
   "directories": {
     "lib": "lib",
-    "test": "test",
-    "doc": "docs"
+    "doc": "docs",
+    "test": "tests",
+    "src": "src"
   }
 }
