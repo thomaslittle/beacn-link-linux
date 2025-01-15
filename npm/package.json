@@ -1,0 +1,11 @@
+{
+  "name": "beacn-native",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "napi build --platform --release"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0"
+  }
+}

@@ -1,0 +1,17 @@
+[package]
+name = "beacn-native"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+name = "beacn_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "2.12.2", default-features = false, features = ["napi4"] }
+napi-derive = "2.12.2"
+libpulse-binding = "2.28.1"
+alsa = "0.7.0"
+
+[build-dependencies]
+napi-build = "2.0.1"

@@ -1,0 +1,53 @@
+{
+  "name": "beacn-desktop-linux",
+  "version": "1.0.0",
+  "description": "Linux-compatible version of the BEACN Link app using PipeWire",
+  "main": "index.js",
+  "bin": {
+    "beacn": "./cli.js"
+  },
+  "scripts": {
+    "build": "node-gyp rebuild",
+    "start": "./cli.js",
+    "prepare": "node-gyp rebuild"
+  },
+  "keywords": [
+    "beacn",
+    "audio",
+    "pipewire",
+    "linux",
+    "cli",
+    "virtual-audio",
+    "audio-routing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-addon-api": "^7.0.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "gypfile": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/beacn-desktop-linux.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "index.js",
+    "cli.js",
+    "binding.gyp",
+    "beacn_native.cc",
+    "README.md",
+    "LICENSE"
+  ]
+}

@@ -1,0 +1,36 @@
+<Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+       mc:Ignorable="d" 
+       TargetType="TreeView">
+  <Setter Property="IsTabStop" Value="False"/>
+  <Setter Property="Template">
+    <Setter.Value>
+      <ControlTemplate TargetType="TreeView">
+        <TreeViewList x:Name="ListControl" ItemContainerStyle="{StaticResource TreeViewItemStyle}" CanDragItems="True" AllowDrop="True" CanReorderItems="True">
+          <TreeViewList.ItemTemplate>
+            <DataTemplate>
+              <Grid Height="44">
+                  <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="{Binding Content}" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{ThemeResource BodyTextBlockStyle}">
+                    <ToolTipService.ToolTip>
+                      <ToolTip Content="{Binding ToolTip}"/>
+                    </ToolTipService.ToolTip>
+                  </TextBlock>
+                  </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </TreeViewList.ItemTemplate>
+          <TreeViewList.ItemContainerTransitions>
+            <TransitionCollection>
+              <ContentThemeTransition/>
+              <ReorderThemeTransition/>
+              <EntranceThemeTransition IsStaggeringEnabled="False"/>
+            </TransitionCollection>
+          </TreeViewList.ItemContainerTransitions>
+        </TreeViewList>
+      </ControlTemplate>
+    </Setter.Value>
+  </Setter>
+</Style>

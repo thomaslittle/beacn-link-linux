@@ -1,0 +1,118 @@
+<Button xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+		UseSystemFocusVisuals="False"
+		>
+  <Button.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#BFBFBF" Opacity="0.6"/>
+      <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="LightGray"/>
+      <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="DarkGray"/>
+      <SolidColorBrush x:Key="ButtonBackground" Color="#E1E1E1"/>
+      <SolidColorBrush x:Key="ButtonForeground" Color="Black"/>
+      <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E5F1FB"/>
+      <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="Black"/>
+      <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#CCE4F7"/>
+      <SolidColorBrush x:Key="ButtonBorderBrush" Color="#ADADAD"/>
+      <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#0078D7"/>
+      <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#0078D7"/>
+	  
+      <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>	  
+    </ResourceDictionary>
+  </Button.Resources>
+  <Button.Template>
+    <ControlTemplate TargetType="Button">
+      <ContentPresenter x:Name="ContentPresenter" AutomationProperties.AccessibilityView="Raw" BackgroundSizing="{TemplateBinding BackgroundSizing}" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" CornerRadius="{TemplateBinding CornerRadius}" ContentTransitions="{TemplateBinding ContentTransitions}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" Padding="{TemplateBinding Padding}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+	    <!--
+		<ContentPresenter.BackgroundTransition>
+          <BrushTransition />
+        </ContentPresenter.BackgroundTransition>
+		-->
+        <VisualStateManager.VisualStateGroups>
+		  <VisualStateGroup x:Name="FocusStates">
+            <VisualState x:Name="Focused">
+              <Storyboard>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPointerOver}" />
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderThickness">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="2" />
+                </ObjectAnimationUsingKeyFrames>
+              </Storyboard>
+            </VisualState>
+            <VisualState x:Name="Unfocused" />
+            <VisualState x:Name="PointerFocused" />
+          </VisualStateGroup>
+          <VisualStateGroup x:Name="CommonStates">		    
+            <VisualState x:Name="Normal">
+              <Storyboard>
+			    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderThickness">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderThemeThickness}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <!-- <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter"/>-->
+              </Storyboard>
+            </VisualState>
+            <VisualState x:Name="PointerOver">
+              <Storyboard>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundPointerOver}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPointerOver}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundPointerOver}"/>
+                </ObjectAnimationUsingKeyFrames>
+				<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderThickness">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderThemeThickness}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <!--<PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter"/>-->
+              </Storyboard>
+            </VisualState>
+            <VisualState x:Name="Pressed">
+              <Storyboard>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundPressed}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPressed}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundPressed}"/>
+                </ObjectAnimationUsingKeyFrames>
+				<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderThickness">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderThemeThickness}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <!--<PointerDownThemeAnimation Storyboard.TargetName="ContentPresenter"/>-->
+              </Storyboard>
+            </VisualState>
+            <VisualState x:Name="Disabled">
+              <Storyboard>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundDisabled}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushDisabled}"/>
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundDisabled}"/>
+                </ObjectAnimationUsingKeyFrames>
+              </Storyboard>
+            </VisualState>
+			<!-- State to manualy set into after pointer exit since there are some issues with focus state drawing, most of the time the button goes focused > pointerover > normal (instead of "focused")  
+			     To be specified the same as Focused
+			-->
+			<VisualState x:Name="Focused2">
+              <Storyboard>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPointerOver}" />
+                </ObjectAnimationUsingKeyFrames>
+                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderThickness">
+                  <DiscreteObjectKeyFrame KeyTime="0" Value="2" />
+                </ObjectAnimationUsingKeyFrames>
+              </Storyboard>
+            </VisualState>
+          </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+      </ContentPresenter>
+    </ControlTemplate>
+  </Button.Template>
+</Button>
